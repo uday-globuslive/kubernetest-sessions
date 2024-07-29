@@ -1,0 +1,23 @@
+
+kubectl create configmap dev-config --from-literal=app.mem=2048m
+kubectl create configmap dev-config --from-file=dev.properties
+
+
+use-configmap-pod.yaml
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-pod
+spec:
+  containers:
+  - image: nginx
+    name: test-container
+    volumeMounts:
+    - mountPath: /etc/config
+      name: configmap-volume
+  volumes:
+  - name: configmap-volume
+    configMap:
+      name: dev-config
+  restartPolicy: Never
