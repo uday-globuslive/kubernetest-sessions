@@ -1,18 +1,21 @@
+```
 FROM busybox
 RUN mkdir /myvolume
 RUN echo "hello world" > /myvolume/hello.txt
 VOLUME /myvolume
+```
 
-
+```
 docker container run -dt --name demo -v myvolume:/myvolume image:tag sh
 
 ls /var/lib/docker/volumes/myvolume/_data
-
+```
 
 -----
 
 ## direct volume created in pod spec for hostfile type.
 
+```
 apiVersion: v1
 kind: Pod
 metadata:
@@ -29,14 +32,17 @@ spec:
     hostPath:
       path: /mydata
       type: Directory
+```
 
+```
 kubectl exec -it demopod-volume bash
 root# cd /data
+```
 
---
 ## separate configuration for pv
-pv.yaml
---
+### pv.yaml
+
+```
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -49,11 +55,14 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: /tmp/data
+```
 
-## kubectl get pv
+```
+kubectl get pv
+```
 
-pvc.yaml
-----
+## pvc.yaml
+```
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -65,9 +74,10 @@ spec:
   resources:
     requests:
       storage: 10Gi
+```
 
-pod-pvc.yaml
----
+## pod-pvc.yaml
+```
 apiVersion: v1
 kind: Pod
 metadata:
@@ -83,3 +93,4 @@ spec:
   - name: first-volume
     persistentVolumeClaim:
       claimName: pvc
+```
