@@ -30,7 +30,7 @@ jobs:
       run: |
           cd apps
           ## echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login --username $DOCKER_HUB_USERNAME --password-stdin
-          docker build -t $DOCKER_IMAGE_NAME .
+          docker build -t $DOCKER_IMAGE_NAME:${GITHUB_SHA} .
           docker push $DOCKER_IMAGE_NAME
 
     # - name: Deploy to Kubernetes
