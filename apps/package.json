@@ -1,0 +1,14 @@
+{
+    "name": "sample-app",
+    "version": "1.0.0",
+    "description": "Sample Node.js application",
+    "main": "app.js",
+    "scripts": {
+      "start": "node app.js"
+    },
+    "author": "Your Name",
+    "license": "MIT",
+    "dependencies": {
+      "express": "^4.17.1"
+    }
+  }
