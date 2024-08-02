@@ -6,10 +6,6 @@ on:
       - main
       - CI
 
-env:
-  DOCKER_HUB_USERNAME: your_username
-  DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -26,12 +22,12 @@ jobs:
             
     - name: Build and push Docker image
       env:
-          DOCKER_IMAGE_NAME: uday1kiran/sample-app-nodejs
+          DOCKER_IMAGE_NAME: ${{ secrets.DOCKER_HUB_USERNAME }}/sample-app-nodejs
       run: |
           cd apps
           ## echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login --username $DOCKER_HUB_USERNAME --password-stdin
           docker build -t $DOCKER_IMAGE_NAME:${GITHUB_SHA} .
-          docker push $DOCKER_IMAGE_NAME
+          docker push $DOCKER_IMAGE_NAME:${GITHUB_SHA}
 
     # - name: Deploy to Kubernetes
     #   uses: azure/k8s-set-context@v1
