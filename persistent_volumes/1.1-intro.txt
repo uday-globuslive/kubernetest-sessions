@@ -1,0 +1,236 @@
+## Concepts of Persistent Volume (PV) and Persistent Volume Claim (PVC)
+In Kubernetes, storage management is abstracted using Persistent Volumes (PVs) and Persistent Volume Claims (PVCs). This abstraction decouples storage from the lifecycle of a pod, ensuring that data persists even if a pod is deleted or rescheduled.
+
+Persistent Volume (PV)
+A PV is a piece of storage in the cluster that has been provisioned by an administrator or dynamically by Kubernetes using Storage Classes. PVs are independent of the lifecycle of pods that use them.
+
+Static Provisioning: An admin manually creates a PV.
+Dynamic Provisioning: Kubernetes dynamically provisions a PV using a Storage Class when a PVC requests storage.
+
+Example of static pv:
+```
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-pv
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: "/mnt/data"
+
+```
+
+Persistent Volume Claim (PVC)
+A PVC is a request for storage by a user. It can specify size, access modes (e.g., ReadWriteOnce, ReadOnlyMany), and StorageClass. When a PVC is created, Kubernetes finds a suitable PV that satisfies the request, binds the PVC to the PV, and the storage becomes available to the pod that uses the PVC.
+
+Example of a PVC
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: manual
+```
+
+Using EBS for PVs and PVCs in a Kubernetes Cluster Created with kubeadm
+Since your cluster is created using kubeadm and not managed by EKS, you can still use AWS EBS volumes for your persistent storage. Here's how you can configure PVs and PVCs using EBS:
+
+Prerequisites
+Ensure that your EC2 instances are in the same availability zone as the EBS volumes you plan to use.
+Attach the EBS volumes to your instances.
+Creating a Storage Class
+A Storage Class allows you to define the provisioner and parameters for dynamically provisioning EBS volumes.
+
+```
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ebs-sc
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp2
+  fsType: ext4
+```
+
+Dynamic Provisioning Example
+Storage Class:
+```
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ebs-sc
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp2
+  fsType: ext4
+```
+PVC:
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ebs-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: ebs-sc
+```
+
+Static Provisioning Example
+Manually create an EBS volume and attach it to your EC2 instance.
+
+Create PV:
+```
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ebs-pv
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  awsElasticBlockStore:
+    volumeID: <your-ebs-volume-id>
+    fsType: ext4
+```
+PVC:
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ebs-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+```
+
+Binding PVC to a Pod
+Once you have your PV and PVC, you can bind them to a pod as follows:
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+    - name: my-container
+      image: nginx
+      volumeMounts:
+        - mountPath: "/usr/share/nginx/html"
+          name: ebs-volume
+  volumes:
+    - name: ebs-volume
+      persistentVolumeClaim:
+        claimName: ebs-pvc
+```
+
+## What is storage class above?
+A StorageClass in Kubernetes is a way to define and manage the various storage backend options available within a cluster. It provides a way to describe the "classes" of storage available, such as performance or backup policies. StorageClasses allow administrators to describe the types of storage they offer and the methods used to provision those storage resources.
+
+Key Components of a StorageClass
+Provisioner: This field specifies the type of storage provisioner. It could be AWS EBS, GCE PD, Azure Disk, etc. The provisioner knows how to interact with the underlying storage provider to create volumes.
+
+Parameters: These are specific to the provisioner and define the storage characteristics such as volume type, IOPS, and filesystem type.
+
+Reclaim Policy: Defines what happens to a persistent volume (PV) when its claim (PVC) is deleted. Common policies are:
+
+Retain: Keeps the volume for manual reclamation.
+Delete: Deletes the volume automatically.
+Recycle: Cleans the volume and makes it available for new claims (though this is deprecated).
+Binding Mode: Determines when the volume binding and provisioning occur. The two modes are Immediate (default) and WaitForFirstConsumer.
+
+Example StorageClass Configuration
+Here’s an example configuration for a StorageClass that provisions AWS EBS volumes:
+```
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ebs-sc
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp2   # General Purpose SSD
+  fsType: ext4   # File system type
+  iopsPerGB: "10"  # Optional parameter, only applicable to io1 type
+reclaimPolicy: Delete
+mountOptions:
+  - debug
+volumeBindingMode: WaitForFirstConsumer
+```
+How StorageClass Works
+Define a StorageClass: Administrators define StorageClasses to describe different storage offerings.
+
+Request Storage via PVC: Users create PersistentVolumeClaims (PVCs) that request storage. They can specify a storageClassName to select the appropriate StorageClass.
+
+Dynamic Provisioning: When a PVC requests storage with a specific storageClassName, Kubernetes uses the defined provisioner and parameters in the StorageClass to dynamically create a PersistentVolume (PV).
+
+Binding: The created PV is then bound to the PVC, and the storage becomes available to the pods that use the PVC.
+
+Example of Using a StorageClass
+Define StorageClass:
+```
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ebs-sc
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp2
+  fsType: ext4
+```
+
+Create a PersistentVolumeClaim (PVC):
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ebs-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: ebs-sc
+```
+Bind PVC to a Pod:
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+    - name: my-container
+      image: nginx
+      volumeMounts:
+        - mountPath: "/usr/share/nginx/html"
+          name: ebs-volume
+  volumes:
+    - name: ebs-volume
+      persistentVolumeClaim:
+        claimName: ebs-pvc
+```
+In this example, the StorageClass ebs-sc is defined to use AWS EBS with specific parameters. When a PVC is created with storageClassName: ebs-sc, Kubernetes dynamically provisions an EBS volume with the specified characteristics and binds it to the PVC. This PVC can then be used by pods to access the storage.

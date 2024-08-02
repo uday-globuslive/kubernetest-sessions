@@ -1,0 +1,33 @@
+pv provisioning types:
+static: a cluster administrator create a number of PVs
+Dynamic: when none of the static PVs the administrator created matches a user's PersistentVolumeClaim, the cluster may try to dynamically provision a volume specially for the PVC.
+
+pvc.yaml
+----
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dynamic-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+
+
+digitalocean-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: csi-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: do-block-storage
+
+reference: https://docs.digitalocean.com/products/kubernetes/how-to/add-volumes/
