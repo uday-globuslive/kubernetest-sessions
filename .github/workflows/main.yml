@@ -1,0 +1,37 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - CI
+
+env:
+  DOCKER_HUB_USERNAME: your_username
+  DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Build and push Docker image
+      env:
+        DOCKER_IMAGE_NAME: uday1kiran/sample-nodejs-app
+      run: |
+        echo $DOCKER_HUB_TOKEN | docker login --username $DOCKER_HUB_USERNAME --password-stdin
+        cd apps
+        docker build -t $DOCKER_IMAGE_NAME .
+        docker push $DOCKER_IMAGE_NAME
+
+    # - name: Deploy to Kubernetes
+    #   uses: azure/k8s-set-context@v1
+    #   with:
+    #     method: kubeconfig
+    #     kubeconfig: ${{ secrets.KUBECONFIG }}
+        
+    # - name: Apply Kubernetes manifest
+    #   run: kubectl apply -f your-kubernetes-manifest.yaml
