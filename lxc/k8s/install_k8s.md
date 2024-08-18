@@ -111,3 +111,44 @@ Step 6: Verify the cluster
    ```
    kubectl get nodes
    ```
+
+
+The difference you're seeing is due to two different LXC interfaces: the newer LXD interface and the older, traditional LXC interface.
+
+1. `lxc ls` is a command for LXD, which is a newer, more user-friendly interface to LXC.
+2. `lxc-ls` is a command for the traditional LXC interface.
+
+It seems that you have the traditional LXC installed, but not LXD. This is why `lxc-ls` works, but `lxc ls` doesn't.
+
+For the purposes of the tutorial I provided, using the traditional LXC commands (like `lxc-ls`, `lxc-start`, `lxc-attach`, etc.) is perfectly fine. You can continue with the tutorial as is.
+
+However, if you'd like to use the newer LXD interface (which can be more convenient in some ways), you can install it:
+
+1. Install LXD:
+   ```
+   sudo apt install lxd
+   ```
+
+2. Initialize LXD (accept the defaults for most options):
+   ```
+   sudo lxd init
+   ```
+
+After this, you should be able to use both `lxc ls` and `lxc-ls`.
+
+For the rest of the tutorial, you can replace the LXC commands with their LXD equivalents if you prefer:
+
+- `lxc-create` becomes `lxc launch`
+- `lxc-start` becomes `lxc start`
+- `lxc-attach` becomes `lxc exec ... -- bash`
+
+For example:
+```
+lxc launch ubuntu:20.04 k8s-master
+lxc launch ubuntu:20.04 k8s-worker1
+lxc launch ubuntu:20.04 k8s-worker2
+
+lxc exec k8s-master -- bash
+```
+
+Both approaches (traditional LXC or LXD) will work for creating a Kubernetes cluster. Choose whichever you're more comfortable with. If you're new to containerization, sticking with the traditional LXC commands as in the original tutorial might be simpler to start with.
