@@ -44,21 +44,10 @@ Certainly! I'll guide you through the process of setting up Ansible on your Ubun
 
    If everything is set up correctly, you should see a success message for each container.
 
-6. To check the configuration file path:
-   ```
-   ansible --version
-   
-   ansible 2.9.6
-     config file = /etc/ansible/ansible.cfg
-     configured module search path = ['/root/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
-     ansible python module location = /usr/lib/python3/dist-packages/ansible
-     executable location = /usr/bin/ansible
-     python version = 3.8.10 (default, Jul 29 2024, 17:02:10) [GCC 9.4.0]
-  ```
+6. To check the configuration file path: ```ansible --version```
 
-  If you get host key error:
-
-  ```
-    ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook your_playbook.yml
-  ```
+7. If you get host key error: ```ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook your_playbook.yml```
+8. To set custom hostkey:
+   - To only that session: ```export ANSIBLE_CONFIG=/path/to/your/custom/ansible.cfg```
+   - To permanently: ```set ANSIBLE_CONFIG=C:\path\to\your\custom\ansible.cfg```
 
