@@ -45,6 +45,20 @@ Here's a step-by-step guide to create an LXC container and set up key-based auth
    lxc exec my-container -- systemctl restart sshd
    ```
 
+8.1. Or can combine all steps above 2-8 and run step 6 first to copy file and run below bash.
+   ```
+   #configure.sh
+   apt update
+   apt install openssh-server -y
+   chmod 700 /root/.ssh
+   chmod 600 /root/.ssh/authorized_keys
+   sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+   sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+   systemctl restart sshd
+   ```
+   And run command: ```cat configure.sh | lxc exec container2 bash```
+   
+
 9. Get the IP address of your container:
    ```
    lxc list my-container
