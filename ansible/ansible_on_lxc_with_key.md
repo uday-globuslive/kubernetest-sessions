@@ -39,6 +39,7 @@ Certainly! I'll guide you through the process of setting up Ansible on your Ubun
 5. Test the connection using Ansible ping module:
    ```
    ansible containers -m ping
+   ansible containers -m ping -i inventory
    ```
 
    If everything is set up correctly, you should see a success message for each container.
