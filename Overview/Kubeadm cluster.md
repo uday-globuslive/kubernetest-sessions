@@ -1,4 +1,4 @@
-I'll guide you through the process of creating a Kubernetes cluster using kubeadm on 4 Ubuntu 24 nodes, creating a sample deployment and daemonset, and configuring a jumpbox with kubectl. I'll explain each step in detail.
+Below steps will guide you through the process of creating a Kubernetes cluster using kubeadm on 4 Ubuntu 24 nodes, creating a sample deployment and daemonset, and configuring a jumpbox with kubectl. I'll explain each step in detail.
 
 Prerequisites:
 - 4 Ubuntu 24 nodes (1 master, 3 workers)
