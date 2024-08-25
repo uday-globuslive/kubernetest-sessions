@@ -31,14 +31,18 @@ Here's a step-by-step guide to create an LXC container and set up key-based auth
    ```
    lxc file push ~/.ssh/id_rsa.pub my-container/root/.ssh/authorized_keys
    ```
+   or use
+   ```
+   ssh-copy-id remoteip
+   ```
 
-7. Set the correct permissions for the .ssh directory and authorized_keys file:
+8. Set the correct permissions for the .ssh directory and authorized_keys file:
    ```
    lxc exec my-container -- chmod 700 /root/.ssh
    lxc exec my-container -- chmod 600 /root/.ssh/authorized_keys
    ```
 
-8. Configure SSH in the container to use key-based authentication:
+9. Configure SSH in the container to use key-based authentication:
    ```
    lxc exec my-container -- sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config
    lxc exec my-container -- sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
