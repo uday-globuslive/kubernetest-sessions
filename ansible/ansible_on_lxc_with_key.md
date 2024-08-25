@@ -41,6 +41,7 @@ Certainly! I'll guide you through the process of setting up Ansible on your Ubun
    ansible containers -m ping
    ansible containers -m ping -i inventory
    ansible all -m ping
+   ansible all -a "uptime"
    ```
 
    If everything is set up correctly, you should see a success message for each container.
