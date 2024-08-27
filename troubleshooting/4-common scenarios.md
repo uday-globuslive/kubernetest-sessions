@@ -209,3 +209,223 @@ Possible causes:
 - Insufficient cluster resources for scaling
 
 These scenarios cover some common Kubernetes issues. When troubleshooting, always start by gathering information about the affected resources, checking logs, and examining events. Use `kubectl describe` and `kubectl logs` extensively to understand what's happening with your resources.
+
+More scenarios:
+
+A
+ Certainly! Here are more Kubernetes troubleshooting scenarios with examples:
+
+8. Scenario: ConfigMap or Secret not updating in Pod
+
+Error: Pod is not reflecting updated ConfigMap or Secret values
+
+Troubleshooting Steps:
+a) Check if ConfigMap/Secret has been updated:
+```
+kubectl get configmap myconfig -o yaml
+kubectl get secret mysecret -o yaml
+```
+
+b) Verify pod is using the latest version:
+```
+kubectl describe pod mypod-abc123
+```
+Look for "Config Source" section
+
+c) Force pod to restart to pick up new changes:
+```
+kubectl rollout restart deployment mydeployment
+```
+
+Possible causes:
+- Pods need to be restarted to pick up changes
+- Volume mount instead of environment variable usage
+
+9. Scenario: Init Container failing
+
+Error:
+```
+NAME                     READY   STATUS     RESTARTS   AGE
+myapp-5b7d9c7b69-xj2nq   0/1     Init:CrashLoopBackOff   3          5m
+```
+
+Troubleshooting Steps:
+a) Check init container logs:
+```
+kubectl logs myapp-5b7d9c7b69-xj2nq -c init-container
+```
+
+b) Describe pod to see init container status:
+```
+kubectl describe pod myapp-5b7d9c7b69-xj2nq
+```
+
+Possible causes:
+- Init container script error
+- Resource it's waiting for is not available
+- Misconfigured init container command
+
+10. Scenario: Pod stuck in Terminating state
+
+Error:
+```
+NAME                     READY   STATUS        RESTARTS   AGE
+myapp-5b7d9c7b69-xj2nq   0/1     Terminating   0          30m
+```
+
+Troubleshooting Steps:
+a) Check pod details:
+```
+kubectl describe pod myapp-5b7d9c7b69-xj2nq
+```
+
+b) Force delete the pod:
+```
+kubectl delete pod myapp-5b7d9c7b69-xj2nq --grace-period=0 --force
+```
+
+Possible causes:
+- Node issues preventing proper pod termination
+- Finalizers preventing pod deletion
+
+11. Scenario: NodePort Service not accessible externally
+
+Error: Unable to access NodePort service from outside the cluster
+
+Troubleshooting Steps:
+a) Verify service configuration:
+```
+kubectl get svc myservice
+```
+
+b) Check node firewall rules:
+```
+sudo iptables -L -n -v | grep <nodeport>
+```
+
+c) Ensure nodes have external IPs:
+```
+kubectl get nodes -o wide
+```
+
+Possible causes:
+- Firewall blocking the NodePort
+- Cluster network plugin configuration issues
+- Cloud provider network configuration
+
+12. Scenario: Deployment rollout stuck
+
+Error:
+```
+kubectl rollout status deployment myapp
+Waiting for deployment "myapp" rollout to finish: 1 old replicas are pending termination...
+```
+
+Troubleshooting Steps:
+a) Check deployment status:
+```
+kubectl get deployment myapp
+```
+
+b) Describe deployment to see rollout status:
+```
+kubectl describe deployment myapp
+```
+
+c) Check events:
+```
+kubectl get events --sort-by='.metadata.creationTimestamp'
+```
+
+Possible causes:
+- Pod disruption budget preventing scale down
+- New pods failing to become ready
+- Resource quotas or limits preventing new pod creation
+
+13. Scenario: Ingress not routing traffic correctly
+
+Error: Ingress-configured hostname not resolving to the correct service
+
+Troubleshooting Steps:
+a) Verify Ingress resource:
+```
+kubectl get ingress myingress -o yaml
+```
+
+b) Check Ingress controller logs:
+```
+kubectl logs -n ingress-nginx deploy/ingress-nginx-controller
+```
+
+c) Ensure services and endpoints exist:
+```
+kubectl get svc
+kubectl get endpoints
+```
+
+Possible causes:
+- Misconfigured Ingress resource
+- Ingress controller not running or misconfigured
+- Backend services not available
+
+14. Scenario: Persistent Volume (PV) stuck in Released state
+
+Error:
+```
+kubectl get pv
+NAME    CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS     CLAIM               STORAGECLASS   REASON   AGE
+mypv    5Gi        RWO            Retain           Released   default/myclaim     manual                  2d
+```
+
+Troubleshooting Steps:
+a) Check PV details:
+```
+kubectl describe pv mypv
+```
+
+b) Verify if any PVCs are still bound:
+```
+kubectl get pvc --all-namespaces
+```
+
+c) Manually edit the PV to remove claimRef:
+```
+kubectl edit pv mypv
+```
+Remove the claimRef section.
+
+Possible causes:
+- PV reclaim policy set to Retain
+- Manual intervention required to clean up the PV
+
+15. Scenario: Kubernetes Dashboard not accessible
+
+Error: Unable to access Kubernetes Dashboard
+
+Troubleshooting Steps:
+a) Verify dashboard deployment:
+```
+kubectl get deploy -n kubernetes-dashboard
+```
+
+b) Check dashboard service:
+```
+kubectl get svc -n kubernetes-dashboard
+```
+
+c) Ensure RBAC is correctly configured:
+```
+kubectl get clusterrolebinding -n kubernetes-dashboard
+```
+
+d) Check dashboard logs:
+```
+kubectl logs deploy/kubernetes-dashboard -n kubernetes-dashboard
+```
+
+Possible causes:
+- Dashboard not deployed
+- RBAC misconfiguration
+- Network policies blocking access
+
+These additional scenarios cover more complex Kubernetes issues. Remember, effective troubleshooting often involves a combination of checking resource states, logs, events, and understanding the expected behavior of your applications and Kubernetes components.
