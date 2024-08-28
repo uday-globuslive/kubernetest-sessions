@@ -8,6 +8,8 @@ Ensure you have a running Kubernetes cluster. If you don't have one, you can cre
 Step 2: Install NGINX Ingress Controller
 The NGINX Ingress Controller is a popular choice for managing ingress traffic to your applications in Kubernetes.
 
+  - Install helm using: https://helm.sh/docs/intro/install/
+
   - Add the NGINX Ingress Helm repository:
     ```
     helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
