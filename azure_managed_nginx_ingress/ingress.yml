@@ -1,0 +1,42 @@
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: aks-helloworld
+#   namespace: hello-web-app-routing
+# spec:
+#   ingressClassName: webapprouting.kubernetes.azure.com
+#   rules:
+#   - host: testroute.mycompany.com
+#     http:
+#       paths:
+#       - backend:
+#           service:
+#             name: aks-helloworld
+#             port:
+#               number: 80
+#         path: /
+#         pathType: Prefix
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aks-helloworld
+  namespace: hello-web-app-routing
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-production"  # Add this annotation
+spec:
+  ingressClassName: webapprouting.kubernetes.azure.com
+  tls:                                                      # Add this section
+  - hosts:
+    - testroute.myerwin.com                                 # Your domain
+    secretName: aks-helloworld-tls                          # The secret name where the certificate will be stored
+  rules:
+  - host: testroute.mycompany.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: aks-helloworld
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
